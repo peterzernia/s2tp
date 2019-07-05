@@ -14,6 +14,8 @@ const LoginScreen = ({ navigation }) => {
         await AsyncStorage.setItem('organization', organization)
         await AsyncStorage.setItem('accessToken', accessToken)
         navigation.navigate('Main')
+      } else {
+        Alert.alert('Credentials cannot be blank')
       }
     } catch (err) {
       let error
@@ -24,9 +26,10 @@ const LoginScreen = ({ navigation }) => {
       } else {
         error = 'Please try again'
       }
-      setAuthenticating(false)
       Alert.alert(error)
     }
+
+    setAuthenticating(false)
   }
 
   return (
