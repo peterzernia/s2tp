@@ -7,16 +7,18 @@ import { func, bool } from 'prop-types'
 const styles = StyleSheet.create({
   container: {
     width: 300,
-    height: 225,
     borderRadius: 10,
     backgroundColor: 'white',
     padding: 10,
     elevation: 10,
-    alignItems: 'center',
   },
   input: {
     height: 50,
     fontSize: 16,
+  },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
   },
   button: {
     width: 100,
@@ -49,16 +51,18 @@ const LoginForm = (props) => {
         placeholder="Target Process Access Token"
         onChangeText={setAccessToken}
       />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => login(organization, accessToken)}
-      >
-        {authenticating ? (
-          <ActivityIndicator size="small" color="white" />
-        ) : (
-          <Text style={styles.buttonText}>Login</Text>
-        )}
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => login(organization, accessToken)}
+        >
+          {authenticating ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
+            <Text style={styles.buttonText}>Login</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
