@@ -48,13 +48,12 @@ const ENTITY_STATES = {
   },
 }
 
-class VoiceTest extends Component {
+export default class MainScreen extends Component {
   state = {
     recognized: '',
     pitch: '',
     error: '',
-    end: '',
-    started: '',
+    recording: '',
     results: [],
     partialResults: [],
     organization: null,
@@ -89,7 +88,7 @@ class VoiceTest extends Component {
     // eslint-disable-next-line
     console.log('onSpeechStart: ', e);
     this.setState({
-      started: '√',
+      recording: '√',
     })
   };
 
@@ -105,7 +104,7 @@ class VoiceTest extends Component {
     // eslint-disable-next-line
     console.log('onSpeechEnd: ', e);
     this.setState({
-      end: '√',
+      recording: '',
     })
   };
 
@@ -113,7 +112,8 @@ class VoiceTest extends Component {
     // eslint-disable-next-line
     console.log('onSpeechError: ', e);
     this.setState({
-      error: JSON.stringify(e.error),
+      error: e.error,
+      recording: '',
     })
   };
 
@@ -147,10 +147,9 @@ class VoiceTest extends Component {
       recognized: '',
       pitch: '',
       error: '',
-      started: '',
+      recording: '',
       results: [],
       partialResults: [],
-      end: '',
     })
 
     try {
@@ -190,10 +189,9 @@ class VoiceTest extends Component {
       recognized: '',
       pitch: '',
       error: '',
-      started: '',
+      recording: '',
       results: [],
       partialResults: [],
-      end: '',
     })
   };
 
@@ -261,17 +259,17 @@ class VoiceTest extends Component {
 
   render() {
     const {
-      recognized, pitch, error, started, results, partialResults, end,
+      recognized, pitch, error, recording, results, partialResults,
     } = this.state
 
     // eslint-disable-next-line
-    console.log(recognized, pitch, partialResults, end)
+    console.log(recognized, pitch, partialResults)
 
     return (
       <View style={styles.container}>
         <View style={styles.textContainer}>
-          <Text style={styles.text}>{`Recording: ${started}`}</Text>
-          <Text style={styles.text}>{`Error: ${error}`}</Text>
+          <Text style={styles.text}>{`Recording: ${recording}`}</Text>
+          <Text style={styles.text}>{`Error: ${error.message || ''}`}</Text>
           <Text style={styles.text}>{`Text: ${results[0] || ''}`}</Text>
         </View>
         <TouchableHighlight
@@ -296,5 +294,3 @@ class VoiceTest extends Component {
     )
   }
 }
-
-export default VoiceTest
