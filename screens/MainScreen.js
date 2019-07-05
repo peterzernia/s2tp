@@ -15,7 +15,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
   },
   welcome: {
     fontSize: 20,
@@ -134,7 +133,7 @@ class VoiceTest extends Component {
     })
 
     try {
-      await Voice.start('es_US')
+      await Voice.start('en_US')
     } catch (e) {
       // eslint-disable-next-line
       console.error(e);
@@ -180,8 +179,6 @@ class VoiceTest extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native Voice!</Text>
-        <Text style={styles.instructions}>Press the button and start speaking.</Text>
         <Text style={styles.stat}>{`Started: ${this.state.started}`}</Text>
         <Text style={styles.stat}>{`Recognized: ${this.state.recognized}`}</Text>
         <Text style={styles.stat}>{`Pitch: ${this.state.pitch}`}</Text>
@@ -199,11 +196,8 @@ class VoiceTest extends Component {
           </Text>
         ))}
         <Text style={styles.stat}>{`End: ${this.state.end}`}</Text>
-        <TouchableHighlight onPress={this._startRecognizing}>
+        <TouchableHighlight onPressIn={this._startRecognizing} onPressOut={this._stopRecognizing}>
           <Image style={styles.button} source={button} />
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this._stopRecognizing}>
-          <Text style={styles.action}>Stop Recognizing</Text>
         </TouchableHighlight>
         <TouchableHighlight onPress={this._cancelRecognizing}>
           <Text style={styles.action}>Cancel</Text>
