@@ -9,21 +9,25 @@ import button from './button.png'
 
 const styles = StyleSheet.create({
   button: {
-    width: 100,
-    height: 100,
+    width: 50,
+    height: 50,
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  action: {
-    textAlign: 'center',
-    color: '#0000FF',
-    marginVertical: 5,
-    fontWeight: 'bold',
+  recordButton: {
+    backgroundColor: 'red',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 20,
   },
-  stat: {
+  text: {
     textAlign: 'center',
     color: '#B0171F',
     marginBottom: 1,
@@ -240,18 +244,24 @@ class VoiceTest extends Component {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.stat}>{`Recording: ${started}`}</Text>
-        <Text style={styles.stat}>{`Error: ${error}`}</Text>
-        <Text style={styles.stat}>{`Text: ${results[0] || ''}`}</Text>
-        <TouchableHighlight onPressIn={this._startRecognizing} onPressOut={this._stopRecognizing}>
+        <View style={styles.textContainer}>
+          <Text style={styles.text}>{`Recording: ${started}`}</Text>
+          <Text style={styles.text}>{`Error: ${error}`}</Text>
+          <Text style={styles.text}>{`Text: ${results[0] || ''}`}</Text>
+        </View>
+        <TouchableHighlight
+          style={styles.recordButton}
+          onPressIn={this._startRecognizing}
+          onPressOut={this._stopRecognizing}
+        >
           <Image style={styles.button} source={button} />
         </TouchableHighlight>
         {
           // <TouchableHighlight onPress={this._cancelRecognizing}>
-          //   <Text style={styles.action}>Cancel</Text>
+          //   <Text>Cancel</Text>
           // </TouchableHighlight>
           // <TouchableHighlight onPress={this._destroyRecognizer}>
-          //   <Text style={styles.action}>Destroy</Text>
+          //   <Text>Destroy</Text>
           // </TouchableHighlight>
         }
       </View>
