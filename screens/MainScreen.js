@@ -231,12 +231,17 @@ class VoiceTest extends Component {
         organization, accessToken, entity, ticket, state,
       } = this.state
 
+      // Check if state exists
       // eslint-disable-next-line
       if (!ENTITY_STATES[entity].hasOwnProperty(state)) {
         throw new Error('Invalid state')
       }
 
-      parseInt(ticket, 10)
+      // Check if ticket is a valid number
+      if (Number.isNaN(parseInt(ticket, 10))) {
+        throw new Error('Ticket must be a valid number')
+      }
+
 
       const url = `https://${organization}.tpondemand.com/api/v1/${entity}/${ticket}/?format=json&access_token=${accessToken}`
       const body = {
