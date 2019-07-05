@@ -6,7 +6,7 @@ import LoginForm from '../components/LoginForm'
 
 const LoginScreen = ({ navigation }) => {
   const [authenticating, setAuthenticating] = useState(false)
-  const login = async (organization, accessToken) => {
+  const authLogin = async (organization, accessToken) => {
     try {
       setAuthenticating(true)
       if (organization && accessToken) {
@@ -28,8 +28,9 @@ const LoginScreen = ({ navigation }) => {
       Alert.alert(error)
     }
   }
+
   return (
-    <LoginForm login={login} authenticating={authenticating} />
+    <LoginForm authLogin={authLogin} authenticating={authenticating} />
   )
 }
 

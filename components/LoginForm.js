@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
 })
 
 const LoginForm = (props) => {
-  const { login, authenticating } = props
+  const { authLogin, authenticating } = props
   const [organization, setOrganization] = useState('')
   const [accessToken, setAccessToken] = useState('')
 
@@ -54,7 +54,7 @@ const LoginForm = (props) => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => login(organization, accessToken)}
+          onPress={() => authLogin(organization, accessToken)}
         >
           {authenticating ? (
             <ActivityIndicator size="small" color="white" />
@@ -70,6 +70,6 @@ const LoginForm = (props) => {
 export default LoginForm
 
 LoginForm.propTypes = {
-  login: func.isRequired,
+  authLogin: func.isRequired,
   authenticating: bool.isRequired,
 }

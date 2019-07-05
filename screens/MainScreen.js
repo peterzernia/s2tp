@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
+import { shape, func } from 'prop-types'
 import {
-  Alert, AsyncStorage, StyleSheet, Text, View, TouchableHighlight,
+  Alert, AsyncStorage, StyleSheet, Text, View, TouchableHighlight, Switch,
 } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import axios from 'axios'
@@ -8,9 +9,11 @@ import Voice from 'react-native-voice'
 
 const styles = StyleSheet.create({
   container: {
+    alignSelf: 'stretch',
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingBottom: 10,
   },
   recordButton: {
     backgroundColor: 'red',
@@ -21,6 +24,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 20,
+  },
+  logoutContainer: {
+    alignSelf: 'stretch',
+    alignItems: 'flex-end',
+  },
+  textContainer: {
+    alignSelf: 'stretch',
   },
   text: {
     textAlign: 'center',
@@ -49,20 +59,6 @@ const ENTITY_STATES = {
 }
 
 export default class MainScreen extends Component {
-  state = {
-    recognized: '',
-    pitch: '',
-    error: '',
-    recording: '',
-    results: [],
-    partialResults: [],
-    organization: null,
-    accessToken: null,
-    entity: null,
-    ticket: null,
-    state: null,
-  };
-
   constructor(props) {
     super(props)
     Voice.onSpeechStart = this.onSpeechStart
@@ -72,6 +68,21 @@ export default class MainScreen extends Component {
     Voice.onSpeechResults = this.onSpeechResults
     Voice.onSpeechPartialResults = this.onSpeechPartialResults
     Voice.onSpeechVolumeChanged = this.onSpeechVolumeChanged
+
+    this.state = {
+      switchValue: true,
+      recognized: '',
+      pitch: '',
+      error: '',
+      recording: '',
+      results: [],
+      partialResults: [],
+      organization: null,
+      accessToken: null,
+      entity: null,
+      ticket: null,
+      state: null,
+    }
   }
 
   async componentDidMount() {
@@ -82,6 +93,13 @@ export default class MainScreen extends Component {
 
   componentWillUnmount() {
     Voice.destroy().then(Voice.removeAllListeners)
+  }
+
+  authLogout = async () => {
+    const { navigation } = this.props
+    await AsyncStorage.removeItem('organization')
+    await AsyncStorage.removeItem('accessToken')
+    navigation.navigate('Login')
   }
 
   onSpeechStart = (e) => {
@@ -259,7 +277,7 @@ export default class MainScreen extends Component {
 
   render() {
     const {
-      recognized, pitch, error, recording, results, partialResults,
+      switchValue, recognized, pitch, error, recording, results, partialResults,
     } = this.state
 
     // eslint-disable-next-line
@@ -268,6 +286,16 @@ export default class MainScreen extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.textContainer}>
+          <View style={styles.logoutContainer}>
+            <Switch
+              value={switchValue}
+              onValueChange={(value) => {
+                this.setState({ switchValue: value })
+                this.authLogout()
+              }
+            }
+            />
+          </View>
           <Text style={styles.text}>{`Recording: ${recording}`}</Text>
           <Text style={styles.text}>{`Error: ${error.message || ''}`}</Text>
           <Text style={styles.text}>{`Text: ${results[0] || ''}`}</Text>
@@ -293,4 +321,10 @@ export default class MainScreen extends Component {
       </View>
     )
   }
+}
+
+MainScreen.propTypes = {
+  navigation: shape({
+    navigate: func,
+  }).isRequired,
 }
