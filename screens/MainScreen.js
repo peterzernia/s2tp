@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import {
-  StyleSheet, Text, View, Image, TouchableHighlight,
+  Alert, AsyncStorage, StyleSheet, Text, View, Image, TouchableHighlight,
 } from 'react-native'
+import axios from 'axios'
 
 import Voice from 'react-native-voice'
 import button from './button.png'
@@ -16,21 +17,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
   action: {
     textAlign: 'center',
     color: '#0000FF',
     marginVertical: 5,
     fontWeight: 'bold',
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
   },
   stat: {
     textAlign: 'center',
@@ -38,6 +29,15 @@ const styles = StyleSheet.create({
     marginBottom: 1,
   },
 })
+
+const ENTITY_STATES = {
+  open: '1',
+  planned: '263',
+  'in progress': '130',
+  'Q&A': '135',
+  'QA passed': '260',
+  done: '2',
+}
 
 class VoiceTest extends Component {
   state = {
@@ -48,6 +48,10 @@ class VoiceTest extends Component {
     started: '',
     results: [],
     partialResults: [],
+    organization: null,
+    accessToken: null,
+    userStory: null,
+    state: null,
   };
 
   constructor(props) {
@@ -59,6 +63,12 @@ class VoiceTest extends Component {
     Voice.onSpeechResults = this.onSpeechResults
     Voice.onSpeechPartialResults = this.onSpeechPartialResults
     Voice.onSpeechVolumeChanged = this.onSpeechVolumeChanged
+  }
+
+  async componentDidMount() {
+    const organization = await AsyncStorage.getItem('organization')
+    const accessToken = await AsyncStorage.getItem('accessToken')
+    this.setState({ organization, accessToken })
   }
 
   componentWillUnmount() {
@@ -97,12 +107,13 @@ class VoiceTest extends Component {
     })
   };
 
-  onSpeechResults = (e) => {
+  onSpeechResults = async (e) => {
     // eslint-disable-next-line
     console.log('onSpeechResults: ', e);
     this.setState({
       results: e.value,
     })
+    await this.updateTargetProcess()
   };
 
   onSpeechPartialResults = (e) => {
@@ -176,26 +187,58 @@ class VoiceTest extends Component {
     })
   };
 
+  transcribeSpeech = () => {
+    const { results } = this.state
+    const transcription = results[0].split(' ')
+    if (transcription.length === 2) {
+      this.setState({
+        userStory: transcription[0],
+        state: transcription[1],
+      })
+    } else if (transcription.length === 3) {
+      this.setState({
+        userStory: transcription[0],
+        state: `${transcription[1]} ${transcription[2]}`,
+      })
+    } else {
+      throw new Error('Transcription too long')
+    }
+  }
+
+  updateTargetProcess = async () => {
+    try {
+      this.transcribeSpeech()
+      const {
+        organization, accessToken, userStory, state,
+      } = this.state
+
+      const url = `https://${organization}.tpondemand.com/api/v1/UserStories/${userStory}/?format=json&access_token=${accessToken}`
+      const body = {
+        EntityState: { Id: ENTITY_STATES[state] },
+      }
+
+      const res = await axios.post(url, body)
+      Alert.alert('success')
+      console.log(res)
+    } catch (err) {
+      console.log(err)
+      Alert.alert(err.message && err.message)
+    }
+  }
+
   render() {
+    const {
+      recognized, pitch, error, started, results, partialResults, end,
+    } = this.state
+
+    console.log(recognized, pitch, partialResults, end)
+
     return (
       <View style={styles.container}>
-        <Text style={styles.stat}>{`Started: ${this.state.started}`}</Text>
-        <Text style={styles.stat}>{`Recognized: ${this.state.recognized}`}</Text>
-        <Text style={styles.stat}>{`Pitch: ${this.state.pitch}`}</Text>
-        <Text style={styles.stat}>{`Error: ${this.state.error}`}</Text>
+        <Text style={styles.stat}>{`Recording: ${started}`}</Text>
+        <Text style={styles.stat}>{`Error: ${error}`}</Text>
+        <Text style={styles.stat}>{`Text: ${results[0]}`}</Text>
         <Text style={styles.stat}>Results</Text>
-        {this.state.results.map((result, index) => (
-          <Text key={`result-${index}`} style={styles.stat}> {/* eslint-disable-line */}
-            {result}
-          </Text>
-        ))}
-        <Text style={styles.stat}>Partial Results</Text>
-        {this.state.partialResults.map((result, index) => (
-          <Text key={`partial-result-${index}`} style={styles.stat}> {/* eslint-disable-line */}
-            {result}
-          </Text>
-        ))}
-        <Text style={styles.stat}>{`End: ${this.state.end}`}</Text>
         <TouchableHighlight onPressIn={this._startRecognizing} onPressOut={this._stopRecognizing}>
           <Image style={styles.button} source={button} />
         </TouchableHighlight>
