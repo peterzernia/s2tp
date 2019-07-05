@@ -19,8 +19,8 @@ const styles = StyleSheet.create({
   },
   recordButton: {
     backgroundColor: 'red',
-    width: 150,
-    height: 150,
+    width: 100,
+    height: 100,
     borderRadius: 75,
     alignSelf: 'center',
     alignItems: 'center',
@@ -35,12 +35,22 @@ const styles = StyleSheet.create({
 })
 
 const ENTITY_STATES = {
-  open: '1',
-  planned: '263',
-  'in progress': '130',
-  'Q&A': '135',
-  'QA passed': '260',
-  done: '2',
+  userstories: {
+    open: '1',
+    planned: '263',
+    'in progress': '130',
+    'Q&A': '135',
+    'QA passed': '260',
+    done: '2',
+  },
+  bugs: {
+    open: '5',
+    planned: '264',
+    'in progress': '139',
+    'Q&A': '6',
+    'QA passed': '261',
+    closed: '8',
+  },
 }
 
 class VoiceTest extends Component {
@@ -54,7 +64,8 @@ class VoiceTest extends Component {
     partialResults: [],
     organization: null,
     accessToken: null,
-    userStory: null,
+    entity: null,
+    ticket: null,
     state: null,
   };
 
@@ -194,18 +205,27 @@ class VoiceTest extends Component {
   transcribeSpeech = () => {
     const { results } = this.state
     const transcription = results[0].split(' ')
-    if (transcription.length === 2) {
+
+    if (transcription[0] === 'bug') {
+      this.setState({ entity: 'bugs' })
+    } else if (transcription[0] === 'story') {
+      this.setState({ entity: 'userstories' })
+    } else {
+      throw new Error('Invalid entity')
+    }
+
+    if (transcription.length === 3) {
       this.setState({
-        userStory: transcription[0],
-        state: transcription[1],
+        ticket: transcription[1],
+        state: transcription[2],
       })
-    } else if (transcription.length === 3) {
+    } else if (transcription.length === 4) {
       this.setState({
-        userStory: transcription[0],
-        state: `${transcription[1]} ${transcription[2]}`,
+        ticket: transcription[1],
+        state: `${transcription[2]} ${transcription[3]}`,
       })
     } else {
-      throw new Error('Transcription too long')
+      throw new Error('Could not process transcription')
     }
   }
 
@@ -213,23 +233,27 @@ class VoiceTest extends Component {
     try {
       this.transcribeSpeech()
       const {
-        organization, accessToken, userStory, state,
+        organization, accessToken, entity, ticket, state,
       } = this.state
 
       // eslint-disable-next-line
-      if (!ENTITY_STATES.hasOwnProperty(state)) {
+      if (!ENTITY_STATES[entity].hasOwnProperty(state)) {
         throw new Error('Invalid state')
       }
 
-      const url = `https://${organization}.tpondemand.com/api/v1/UserStories/${userStory}/?format=json&access_token=${accessToken}`
+      parseInt(ticket, 10)
+
+      const url = `https://${organization}.tpondemand.com/api/v1/${entity}/${ticket}/?format=json&access_token=${accessToken}`
       const body = {
-        EntityState: { Id: ENTITY_STATES[state] },
+        EntityState: { Id: ENTITY_STATES[entity][state] },
       }
 
       const res = await axios.post(url, body)
       Alert.alert('success')
+      // eslint-disable-next-line
       console.log(res)
     } catch (err) {
+      // eslint-disable-next-line
       console.log(err)
       Alert.alert(err.message && err.message)
     }
@@ -240,6 +264,7 @@ class VoiceTest extends Component {
       recognized, pitch, error, started, results, partialResults, end,
     } = this.state
 
+    // eslint-disable-next-line
     console.log(recognized, pitch, partialResults, end)
 
     return (
