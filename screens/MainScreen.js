@@ -9,8 +9,8 @@ import button from './button.png'
 
 const styles = StyleSheet.create({
   button: {
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
   },
   container: {
     flex: 1,
@@ -212,6 +212,11 @@ class VoiceTest extends Component {
         organization, accessToken, userStory, state,
       } = this.state
 
+      // eslint-disable-next-line
+      if (!ENTITY_STATES.hasOwnProperty(state)) {
+        throw new Error('Invalid state')
+      }
+
       const url = `https://${organization}.tpondemand.com/api/v1/UserStories/${userStory}/?format=json&access_token=${accessToken}`
       const body = {
         EntityState: { Id: ENTITY_STATES[state] },
@@ -237,17 +242,18 @@ class VoiceTest extends Component {
       <View style={styles.container}>
         <Text style={styles.stat}>{`Recording: ${started}`}</Text>
         <Text style={styles.stat}>{`Error: ${error}`}</Text>
-        <Text style={styles.stat}>{`Text: ${results[0]}`}</Text>
-        <Text style={styles.stat}>Results</Text>
+        <Text style={styles.stat}>{`Text: ${results[0] || ''}`}</Text>
         <TouchableHighlight onPressIn={this._startRecognizing} onPressOut={this._stopRecognizing}>
           <Image style={styles.button} source={button} />
         </TouchableHighlight>
-        <TouchableHighlight onPress={this._cancelRecognizing}>
-          <Text style={styles.action}>Cancel</Text>
-        </TouchableHighlight>
-        <TouchableHighlight onPress={this._destroyRecognizer}>
-          <Text style={styles.action}>Destroy</Text>
-        </TouchableHighlight>
+        {
+          // <TouchableHighlight onPress={this._cancelRecognizing}>
+          //   <Text style={styles.action}>Cancel</Text>
+          // </TouchableHighlight>
+          // <TouchableHighlight onPress={this._destroyRecognizer}>
+          //   <Text style={styles.action}>Destroy</Text>
+          // </TouchableHighlight>
+        }
       </View>
     )
   }
