@@ -27,9 +27,8 @@ const LoginScreen = ({ navigation }) => {
         error = 'Please try again'
       }
       Alert.alert(error)
+      setAuthenticating(false)
     }
-
-    setAuthenticating(false)
   }
 
   return (
