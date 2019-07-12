@@ -228,7 +228,7 @@ export default class MainScreen extends Component {
       }
 
       const res = await axios.post(url, body)
-      Alert.alert('success')
+      Alert.alert(`Successfully moved ${ticket} to ${state}`)
       // eslint-disable-next-line
       console.log(res)
     } catch (err) {
