@@ -5,7 +5,7 @@ import {
 import { shape, func } from 'prop-types'
 
 
-const AuthLoadingScreen = ({ navigation }) => {
+export default function AuthLoadingScreen({ navigation }) {
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
@@ -33,7 +33,6 @@ const AuthLoadingScreen = ({ navigation }) => {
   )
 }
 
-export default AuthLoadingScreen
 
 AuthLoadingScreen.propTypes = {
   navigation: shape({

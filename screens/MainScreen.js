@@ -1,63 +1,14 @@
 import React, { Component } from 'react'
 import { shape, func } from 'prop-types'
 import {
-  Alert, AsyncStorage, StyleSheet, Text, View, TouchableHighlight, Switch,
+  Alert, AsyncStorage, Text, View, TouchableHighlight, Switch,
 } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import axios from 'axios'
 import Voice from 'react-native-voice'
 import FuzzySet from 'fuzzyset.js'
-
-const styles = StyleSheet.create({
-  container: {
-    alignSelf: 'stretch',
-    flex: 1,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: 10,
-  },
-  recordButton: {
-    backgroundColor: 'red',
-    width: 100,
-    height: 100,
-    borderRadius: 75,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 20,
-  },
-  logoutContainer: {
-    alignSelf: 'stretch',
-    alignItems: 'flex-end',
-  },
-  textContainer: {
-    alignSelf: 'stretch',
-  },
-  text: {
-    textAlign: 'center',
-    color: '#B0171F',
-    marginBottom: 1,
-  },
-})
-
-const ENTITY_STATES = {
-  userstories: {
-    open: '1',
-    planned: '263',
-    'in progress': '130',
-    'Q&A': '135',
-    'QA passed': '260',
-    done: '2',
-  },
-  bugs: {
-    open: '5',
-    planned: '264',
-    'in progress': '139',
-    'Q&A': '6',
-    'QA passed': '261',
-    closed: '8',
-  },
-}
+import { mainScreenStyles as styles } from './styles'
+import { ENTITY_STATES } from '../constants'
 
 export default class MainScreen extends Component {
   constructor(props) {
@@ -80,9 +31,9 @@ export default class MainScreen extends Component {
       partialResults: [],
       organization: null,
       accessToken: null,
-      entity: null,
-      ticket: null,
-      state: null,
+      entity: null, // UserStory or Bug
+      ticket: null, // Target Process Ticket Number
+      state: null, // Open, Planned, In Progress, QA, QA Passed, Done, Closed
     }
   }
 

@@ -4,7 +4,7 @@ import { shape, func } from 'prop-types'
 import axios from 'axios'
 import LoginForm from '../components/LoginForm'
 
-const LoginScreen = ({ navigation }) => {
+export default function LoginScreen({ navigation }) {
   const [authenticating, setAuthenticating] = useState(false)
   const authLogin = async (organization, accessToken) => {
     try {
@@ -35,8 +35,6 @@ const LoginScreen = ({ navigation }) => {
     <LoginForm authLogin={authLogin} authenticating={authenticating} />
   )
 }
-
-export default LoginScreen
 
 LoginScreen.propTypes = {
   navigation: shape({
