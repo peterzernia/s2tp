@@ -218,7 +218,7 @@ export default class MainScreen extends Component {
     const { results } = this.state
     const transcription = results[0].split(' ')
 
-    // Match state to closest allowed word
+    // Match entity to closest allowed word
     const fuzzySet = FuzzySet(['story', 'bug'])
     transcription[0] = fuzzySet.get(transcription[0])[0][1]
 
@@ -254,7 +254,7 @@ export default class MainScreen extends Component {
       } = this.state
       let { state } = this.state
 
-      // Match entity to closest allowed words
+      // Match state to closest allowed words
       const fuzzySet = FuzzySet(['open', 'planned', 'in progress', 'Q&A', 'QA passed', 'done', 'closed'])
       state = fuzzySet.get(state)[0][1]
 
