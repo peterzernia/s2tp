@@ -6,6 +6,7 @@ import {
 import Svg, { Path } from 'react-native-svg'
 import axios from 'axios'
 import Voice from 'react-native-voice'
+import FuzzySet from 'fuzzyset.js'
 
 const styles = StyleSheet.create({
   container: {
@@ -217,6 +218,11 @@ export default class MainScreen extends Component {
     const { results } = this.state
     const transcription = results[0].split(' ')
 
+    // Match state to closest allowed word
+    const fuzzySet = FuzzySet(['story', 'bug'])
+    transcription[0] = fuzzySet.get(transcription[0])[0][1]
+
+
     if (transcription[0] === 'bug') {
       this.setState({ entity: 'bugs' })
     } else if (transcription[0] === 'story') {
@@ -244,8 +250,14 @@ export default class MainScreen extends Component {
     try {
       this.transcribeSpeech()
       const {
-        organization, accessToken, entity, ticket, state,
+        organization, accessToken, ticket, entity,
       } = this.state
+      let { state } = this.state
+
+      // Match entity to closest allowed words
+      const fuzzySet = FuzzySet(['open', 'planned', 'in progress', 'Q&A', 'QA passed', 'done', 'closed'])
+      state = fuzzySet.get(state)[0][1]
+
 
       // Check if state exists
       // eslint-disable-next-line
