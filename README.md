@@ -11,8 +11,8 @@ Available on the [Google Play Store](https://play.google.com/store/apps/details?
 - Enter your organization's name ( the one used in your tp url, e.g. Medigo from https://medigo.tpondemand.com )
 - Enter the Access Token you created earlier.
 
-Tickets can now be moved around by holding record and saying 'entity ticketNumber state'
-e.g. 'story 6258 in progress' or 'bug 5439 QA passed'
+Tickets can now be moved around by holding record and saying a ticket number and state
+e.g. '6258 in progress' or '5439 QA passed'
 
 ## Notes
 

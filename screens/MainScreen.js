@@ -10,6 +10,7 @@ import FuzzySet from 'fuzzyset.js'
 import { mainScreenStyles as styles } from './styles'
 import { ENTITY_STATES } from '../constants'
 
+/* eslint no-console:0 */
 export default class MainScreen extends Component {
   constructor(props) {
     super(props)
@@ -31,7 +32,6 @@ export default class MainScreen extends Component {
       partialResults: [],
       organization: null,
       accessToken: null,
-      entity: null, // UserStory or Bug
       ticket: null, // Target Process Ticket Number
       state: null, // Open, Planned, In Progress, QA, QA Passed, Done, Closed
     }
@@ -55,32 +55,28 @@ export default class MainScreen extends Component {
   }
 
   onSpeechStart = (e) => {
-    // eslint-disable-next-line
-    console.log('onSpeechStart: ', e);
+    console.log('onSpeechStart: ', e)
     this.setState({
       recording: '√',
     })
   };
 
   onSpeechRecognized = (e) => {
-    // eslint-disable-next-line
-    console.log('onSpeechRecognized: ', e);
+    console.log('onSpeechRecognized: ', e)
     this.setState({
       recognized: '√',
     })
   };
 
   onSpeechEnd = (e) => {
-    // eslint-disable-next-line
-    console.log('onSpeechEnd: ', e);
+    console.log('onSpeechEnd: ', e)
     this.setState({
       recording: '',
     })
   };
 
   onSpeechError = (e) => {
-    // eslint-disable-next-line
-    console.log('onSpeechError: ', e);
+    console.log('onSpeechError: ', e)
     this.setState({
       error: e.error,
       recording: '',
@@ -88,8 +84,7 @@ export default class MainScreen extends Component {
   };
 
   onSpeechResults = async (e) => {
-    // eslint-disable-next-line
-    console.log('onSpeechResults: ', e);
+    console.log('onSpeechResults: ', e)
     this.setState({
       results: e.value,
     })
@@ -97,16 +92,14 @@ export default class MainScreen extends Component {
   };
 
   onSpeechPartialResults = (e) => {
-    // eslint-disable-next-line
-    console.log('onSpeechPartialResults: ', e);
+    console.log('onSpeechPartialResults: ', e)
     this.setState({
       partialResults: e.value,
     })
   };
 
   onSpeechVolumeChanged = (e) => {
-    // eslint-disable-next-line
-    console.log('onSpeechVolumeChanged: ', e);
+    console.log('onSpeechVolumeChanged: ', e)
     this.setState({
       pitch: e.value,
     })
@@ -125,8 +118,7 @@ export default class MainScreen extends Component {
     try {
       await Voice.start('en_US')
     } catch (e) {
-      // eslint-disable-next-line
-      console.error(e);
+      console.error(e)
     }
   };
 
@@ -134,8 +126,7 @@ export default class MainScreen extends Component {
     try {
       await Voice.stop()
     } catch (e) {
-      // eslint-disable-next-line
-      console.error(e);
+      console.error(e)
     }
   };
 
@@ -143,8 +134,7 @@ export default class MainScreen extends Component {
     try {
       await Voice.cancel()
     } catch (e) {
-      // eslint-disable-next-line
-      console.error(e);
+      console.error(e)
     }
   };
 
@@ -152,8 +142,7 @@ export default class MainScreen extends Component {
     try {
       await Voice.destroy()
     } catch (e) {
-      // eslint-disable-next-line
-      console.error(e);
+      console.error(e)
     }
     this.setState({
       recognized: '',
@@ -169,28 +158,20 @@ export default class MainScreen extends Component {
     const { results } = this.state
     const transcription = results[0].split(' ')
 
-    // Match entity to closest allowed word
-    const fuzzySet = FuzzySet(['story', 'bug'])
-    transcription[0] = fuzzySet.get(transcription[0])[0][1]
-
-
-    if (transcription[0] === 'bug') {
-      this.setState({ entity: 'bugs' })
-    } else if (transcription[0] === 'story') {
-      this.setState({ entity: 'userstories' })
-    } else {
-      throw new Error('Invalid entity')
+    // Check if ticket is a valid number
+    if (Number.isNaN(parseInt(transcription[0], 10))) {
+      throw new Error('Ticket must be a valid number')
     }
 
-    if (transcription.length === 3) {
+    if (transcription.length === 2) {
       this.setState({
-        ticket: transcription[1],
-        state: transcription[2],
+        ticket: transcription[0],
+        state: transcription[1],
       })
-    } else if (transcription.length === 4) {
+    } else if (transcription.length === 3) {
       this.setState({
-        ticket: transcription[1],
-        state: `${transcription[2]} ${transcription[3]}`,
+        ticket: transcription[0],
+        state: `${transcription[1]} ${transcription[2]}`,
       })
     } else {
       throw new Error('Could not process transcription')
@@ -201,7 +182,7 @@ export default class MainScreen extends Component {
     try {
       this.transcribeSpeech()
       const {
-        organization, accessToken, ticket, entity,
+        organization, accessToken, ticket,
       } = this.state
       let { state } = this.state
 
@@ -209,32 +190,40 @@ export default class MainScreen extends Component {
       const fuzzySet = FuzzySet(['open', 'planned', 'in progress', 'Q&A', 'QA passed', 'done', 'closed'])
       state = fuzzySet.get(state)[0][1]
 
-
-      // Check if state exists
-      // eslint-disable-next-line
-      if (!ENTITY_STATES[entity].hasOwnProperty(state)) {
-        throw new Error('Invalid state')
-      }
-
-      // Check if ticket is a valid number
-      if (Number.isNaN(parseInt(ticket, 10))) {
-        throw new Error('Ticket must be a valid number')
-      }
-
-
-      const url = `https://${organization}.tpondemand.com/api/v1/${entity}/${ticket}/?format=json&access_token=${accessToken}`
-      const body = {
+      let entity = 'userstories'
+      let url = `https://${organization}.tpondemand.com/api/v1/${entity}/${ticket}/?format=json&access_token=${accessToken}`
+      let body = {
         EntityState: { Id: ENTITY_STATES[entity][state] },
       }
 
-      const res = await axios.post(url, body)
-      Alert.alert(`Successfully moved ${ticket} to ${state}`)
-      // eslint-disable-next-line
-      console.log(res)
+      // Attempt to updated ticket as a User Story. If this fails
+      // with res.status === 404 User Story not found, try to
+      // update ticket as a Bug.
+      axios.post(url, body).then(() => {
+        Alert.alert(`Successfully moved user story ${ticket} to ${state}`)
+      }).catch(async (err) => {
+        if (err.response.status === 404) {
+          entity = 'bugs'
+          url = `https://${organization}.tpondemand.com/api/v1/${entity}/${ticket}/?format=json&access_token=${accessToken}`
+          body = {
+            EntityState: { Id: ENTITY_STATES[entity][state] },
+          }
+
+          await axios.post(url, body)
+          Alert.alert(`Successfully moved bug ${ticket} to ${state}`)
+        } else {
+          throw new Error(err)
+        }
+      })
     } catch (err) {
-      // eslint-disable-next-line
       console.log(err)
-      Alert.alert(err.message && err.message)
+      if (err.response.status === 404) {
+        Alert.alert('Ticket does not exist')
+      } else if (err.response.status === 401) {
+        Alert.alert('Invalid Access Token.\nPlease logout and reenter credentials.')
+      } else {
+        Alert.alert(err.message && err.message)
+      }
     }
   }
 
@@ -243,7 +232,6 @@ export default class MainScreen extends Component {
       switchValue, recognized, pitch, error, recording, results, partialResults,
     } = this.state
 
-    // eslint-disable-next-line
     console.log(recognized, pitch, partialResults)
 
     return (

@@ -6,6 +6,7 @@ export const ENTITY_STATES = {
     'Q&A': '135',
     'QA passed': '260',
     done: '2',
+    closed: '2',
   },
   bugs: {
     open: '5',
@@ -14,5 +15,6 @@ export const ENTITY_STATES = {
     'Q&A': '6',
     'QA passed': '261',
     closed: '8',
+    done: '8',
   },
 }

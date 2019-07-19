@@ -21,7 +21,7 @@ export default function LoginScreen({ navigation }) {
       let error
       if (typeof err.response === 'undefined') {
         error = 'Invalid organization name'
-      } else if (err.response.request.status === 401) {
+      } else if (err.response.status === 401) {
         error = 'Invalid Access Token'
       } else {
         error = 'Please try again'
