@@ -10,7 +10,6 @@ import FuzzySet from 'fuzzyset.js'
 import { mainScreenStyles as styles } from './styles'
 import { ENTITY_STATES } from '../constants'
 
-/* eslint no-console:0 */
 export default class MainScreen extends Component {
   constructor(props) {
     super(props)

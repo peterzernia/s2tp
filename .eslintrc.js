@@ -28,6 +28,7 @@ module.exports = {
     semi: ['error', 'never', { 'beforeStatementContinuationChars': 'always'}],
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
+    "no-console": 0,
   },
   env: {
     browser: true,
