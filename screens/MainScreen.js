@@ -7,8 +7,8 @@ import Svg, { Path } from 'react-native-svg'
 import axios from 'axios'
 import Voice from 'react-native-voice'
 import FuzzySet from 'fuzzyset.js'
+import { STATES } from '../constants'
 import { mainScreenStyles as styles } from './styles'
-import { ENTITY_STATES } from '../constants'
 
 export default class MainScreen extends Component {
   constructor(props) {
@@ -58,21 +58,21 @@ export default class MainScreen extends Component {
     this.setState({
       recording: '√',
     })
-  };
+  }
 
   onSpeechRecognized = (e) => {
     console.log('onSpeechRecognized: ', e)
     this.setState({
       recognized: '√',
     })
-  };
+  }
 
   onSpeechEnd = (e) => {
     console.log('onSpeechEnd: ', e)
     this.setState({
       recording: '',
     })
-  };
+  }
 
   onSpeechError = (e) => {
     console.log('onSpeechError: ', e)
@@ -80,7 +80,7 @@ export default class MainScreen extends Component {
       error: e.error,
       recording: '',
     })
-  };
+  }
 
   onSpeechResults = async (e) => {
     console.log('onSpeechResults: ', e)
@@ -88,21 +88,21 @@ export default class MainScreen extends Component {
       results: e.value,
     })
     await this.updateTargetProcess()
-  };
+  }
 
   onSpeechPartialResults = (e) => {
     console.log('onSpeechPartialResults: ', e)
     this.setState({
       partialResults: e.value,
     })
-  };
+  }
 
   onSpeechVolumeChanged = (e) => {
     console.log('onSpeechVolumeChanged: ', e)
     this.setState({
       pitch: e.value,
     })
-  };
+  }
 
   _startRecognizing = async () => {
     this.setState({
@@ -119,7 +119,7 @@ export default class MainScreen extends Component {
     } catch (e) {
       console.error(e)
     }
-  };
+  }
 
   _stopRecognizing = async () => {
     try {
@@ -127,7 +127,7 @@ export default class MainScreen extends Component {
     } catch (e) {
       console.error(e)
     }
-  };
+  }
 
   _cancelRecognizing = async () => {
     try {
@@ -135,7 +135,7 @@ export default class MainScreen extends Component {
     } catch (e) {
       console.error(e)
     }
-  };
+  }
 
   _destroyRecognizer = async () => {
     try {
@@ -151,7 +151,7 @@ export default class MainScreen extends Component {
       results: [],
       partialResults: [],
     })
-  };
+  }
 
   transcribeSpeech = () => {
     const { results } = this.state
@@ -181,54 +181,57 @@ export default class MainScreen extends Component {
     try {
       this.transcribeSpeech()
       const {
-        organization, accessToken, ticket,
+        organization,
+        accessToken,
+        ticket,
       } = this.state
-      let { state } = this.state
 
       // Match state to closest allowed words
-      const fuzzySet = FuzzySet(['open', 'planned', 'in progress', 'Q&A', 'QA passed', 'done', 'closed'])
-      state = fuzzySet.get(state)[0][1]
+      const fuzzySet = FuzzySet(STATES)
+      const state = fuzzySet.get(this.state.state)[0][1]
+      console.log(state, ticket)
 
-      let entity = 'userstories'
-      let url = `https://${organization}.tpondemand.com/api/v1/${entity}/${ticket}/?format=json&access_token=${accessToken}`
-      let body = {
-        EntityState: { Id: ENTITY_STATES[entity][state] },
-      }
+      const nextStates = await axios.get(
+        `https://${organization}.tpondemand.com/api/v1/assignables/${ticket}?include=[entitystate[nextstates]]&format=json&access_token=${accessToken}`,
+      )
 
-      // Attempt to updated ticket as a User Story. If this fails
-      // with res.status === 404 User Story not found, try to
-      // update ticket as a Bug.
-      axios.post(url, body).then(() => {
-        Alert.alert(`Successfully moved user story ${ticket} to ${state}`)
-      }).catch(async (err) => {
-        if (err.response.status === 404) {
-          entity = 'bugs'
-          url = `https://${organization}.tpondemand.com/api/v1/${entity}/${ticket}/?format=json&access_token=${accessToken}`
-          body = {
-            EntityState: { Id: ENTITY_STATES[entity][state] },
-          }
+      console.log(JSON.parse(nextStates.request.response))
 
-          await axios.post(url, body)
-          Alert.alert(`Successfully moved bug ${ticket} to ${state}`)
-        } else {
-          throw new Error(err)
-        }
-      })
+      const nextState = JSON.parse(nextStates.request.response).EntityState.NextStates.Items.find(
+        item => item.Name === state,
+      )
+
+      if (!nextState) throw new Error('Invalid ticket state')
+
+      const Id = nextState.Id
+
+      await axios.post(
+        `https://${organization}.tpondemand.com/api/v1/assignables/${ticket}/?format=json&access_token=${accessToken}`,
+        { EntityState: { Id } },
+      )
+
+      Alert.alert(`Moved ticket #${ticket} to ${state}`)
     } catch (err) {
       console.log(err)
-      if (err.response.status === 404) {
+      if (err.response && err.response.status === 404) {
         Alert.alert('Ticket does not exist')
-      } else if (err.response.status === 401) {
+      } else if (err.response && err.response.status === 401) {
         Alert.alert('Invalid Access Token.\nPlease logout and reenter credentials.')
       } else {
-        Alert.alert(err.message && err.message)
+        Alert.alert(err.message || 'There was an unknown error')
       }
     }
   }
 
   render() {
     const {
-      switchValue, recognized, pitch, error, recording, results, partialResults,
+      switchValue,
+      recognized,
+      pitch,
+      error,
+      recording,
+      results,
+      partialResults,
     } = this.state
 
     console.log(recognized, pitch, partialResults)
