@@ -189,13 +189,10 @@ export default class MainScreen extends Component {
       // Match state to closest allowed words
       const fuzzySet = FuzzySet(STATES)
       const state = fuzzySet.get(this.state.state)[0][1]
-      console.log(state, ticket)
 
       const nextStates = await axios.get(
         `https://${organization}.tpondemand.com/api/v1/assignables/${ticket}?include=[entitystate[nextstates]]&format=json&access_token=${accessToken}`,
       )
-
-      console.log(JSON.parse(nextStates.request.response))
 
       const nextState = JSON.parse(nextStates.request.response).EntityState.NextStates.Items.find(
         item => item.Name === state,
