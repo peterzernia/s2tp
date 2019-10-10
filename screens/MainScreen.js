@@ -1,13 +1,11 @@
 import React, { Component } from 'react'
 import { shape, func } from 'prop-types'
 import {
-  Alert, AsyncStorage, Text, View, TouchableHighlight, Switch,
+  AsyncStorage, Text, View, TouchableHighlight, Switch,
 } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
-import axios from 'axios'
 import Voice from 'react-native-voice'
-import FuzzySet from 'fuzzyset.js'
-import { STATES } from '../constants'
+import { updateTargetProcess } from '../utils'
 import { mainScreenStyles as styles } from './styles'
 
 export default class MainScreen extends Component {
@@ -31,8 +29,6 @@ export default class MainScreen extends Component {
       partialResults: [],
       organization: null,
       accessToken: null,
-      ticket: null, // Target Process Ticket Number
-      state: null, // Open, Planned, In Progress, QA, QA Passed, Done, Closed
     }
   }
 
@@ -84,10 +80,11 @@ export default class MainScreen extends Component {
 
   onSpeechResults = async (e) => {
     console.log('onSpeechResults: ', e)
-    this.setState({
-      results: e.value,
-    })
-    await this.updateTargetProcess()
+    const { organization, accessToken } = this.state
+
+    this.setState({ results: e.value })
+
+    await updateTargetProcess(e.value, organization, accessToken)
   }
 
   onSpeechPartialResults = (e) => {
@@ -151,73 +148,6 @@ export default class MainScreen extends Component {
       results: [],
       partialResults: [],
     })
-  }
-
-  transcribeSpeech = () => {
-    const { results } = this.state
-    const transcription = results[0].split(' ')
-
-    // Check if ticket is a valid number
-    if (Number.isNaN(parseInt(transcription[0], 10))) {
-      throw new Error('Ticket must be a valid number')
-    }
-
-    if (transcription.length === 2) {
-      this.setState({
-        ticket: transcription[0],
-        state: transcription[1],
-      })
-    } else if (transcription.length === 3) {
-      this.setState({
-        ticket: transcription[0],
-        state: `${transcription[1]} ${transcription[2]}`,
-      })
-    } else {
-      throw new Error('Could not process transcription')
-    }
-  }
-
-  updateTargetProcess = async () => {
-    try {
-      this.transcribeSpeech()
-      const {
-        organization,
-        accessToken,
-        ticket,
-      } = this.state
-
-      // Match state to closest allowed words
-      const fuzzySet = FuzzySet(STATES)
-      const state = fuzzySet.get(this.state.state)[0][1]
-
-      const nextStates = await axios.get(
-        `https://${organization}.tpondemand.com/api/v1/assignables/${ticket}?include=[entitystate[nextstates]]&format=json&access_token=${accessToken}`,
-      )
-
-      const nextState = JSON.parse(nextStates.request.response).EntityState.NextStates.Items.find(
-        item => item.Name === state,
-      )
-
-      if (!nextState) throw new Error('Invalid ticket state')
-
-      const Id = nextState.Id
-
-      await axios.post(
-        `https://${organization}.tpondemand.com/api/v1/assignables/${ticket}/?format=json&access_token=${accessToken}`,
-        { EntityState: { Id } },
-      )
-
-      Alert.alert(`Moved ticket #${ticket} to ${state}`)
-    } catch (err) {
-      console.log(err)
-      if (err.response && err.response.status === 404) {
-        Alert.alert('Ticket does not exist')
-      } else if (err.response && err.response.status === 401) {
-        Alert.alert('Invalid Access Token.\nPlease logout and reenter credentials.')
-      } else {
-        Alert.alert(err.message || 'There was an unknown error')
-      }
-    }
   }
 
   render() {
