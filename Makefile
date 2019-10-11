@@ -10,3 +10,7 @@ build:
 log:
 	react-native log-android
 .PHONY: log
+
+test: 
+	yarn test
+.PHONY: test
