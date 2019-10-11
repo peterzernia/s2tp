@@ -35,7 +35,7 @@ export const updateTargetProcess = async (results, organization, accessToken) =>
 
     // Match state to closest allowed words
     const fuzzySet = FuzzySet(STATES)
-    const transcribedState = fuzzySet.get(state)[0][1]
+    const matchState = fuzzySet.get(state)[0][1]
 
     // Get the available states/ids for the ticket
     const nextStates = await axios.get(
@@ -43,7 +43,7 @@ export const updateTargetProcess = async (results, organization, accessToken) =>
     )
 
     const nextState = JSON.parse(nextStates.request.response).EntityState.NextStates.Items.find(
-      item => item.Name === transcribedState,
+      item => item.Name === matchState,
     )
 
     if (!nextState) throw new Error('Invalid ticket state')
@@ -56,7 +56,7 @@ export const updateTargetProcess = async (results, organization, accessToken) =>
 
     Alert.alert(
       'Success',
-      `Moved ticket #${ticket} to ${state}`,
+      `Moved ticket #${ticket} to ${matchState}`,
       [
         {
           text: 'Undo',
