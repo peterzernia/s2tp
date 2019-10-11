@@ -12,11 +12,15 @@ export const loginFormStyles = StyleSheet.create({
     height: 50,
     fontSize: 16,
   },
+  buttons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
   buttonContainer: {
     width: '100%',
     alignItems: 'center',
   },
-  button: {
+  loginButton: {
     width: 100,
     height: 50,
     alignItems: 'center',
@@ -24,8 +28,20 @@ export const loginFormStyles = StyleSheet.create({
     backgroundColor: '#2196f3',
     borderRadius: 10,
   },
-  buttonText: {
+  helpButton: {
+    width: 100,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  loginText: {
     color: 'white',
     fontSize: 16,
+  },
+  helpText: {
+    color: '#2196f3',
+    fontSize: 20,
   },
 })

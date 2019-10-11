@@ -34,7 +34,11 @@ export default function LoginScreen({ navigation }) {
   }
 
   return (
-    <LoginForm authLogin={authLogin} authenticating={authenticating} />
+    <LoginForm
+      authLogin={authLogin}
+      authenticating={authenticating}
+      navigation={navigation}
+    />
   )
 }
 
