@@ -22,6 +22,9 @@ export const mainScreenStyles = StyleSheet.create({
     alignSelf: 'stretch',
     alignItems: 'flex-end',
   },
+  logoutButton: {
+    padding: 10,
+  },
   textContainer: {
     alignSelf: 'stretch',
   },
