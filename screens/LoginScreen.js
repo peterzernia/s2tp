@@ -11,8 +11,10 @@ export default function LoginScreen({ navigation }) {
       setAuthenticating(true)
       if (organization && accessToken) {
         await axios.get(`https://${organization}.tpondemand.com/api/v1/UserStories/?format=json&access_token=${accessToken}`)
+
         await AsyncStorage.setItem('organization', organization)
         await AsyncStorage.setItem('accessToken', accessToken)
+
         navigation.navigate('Main')
       } else {
         Alert.alert('Credentials cannot be blank')
@@ -32,7 +34,11 @@ export default function LoginScreen({ navigation }) {
   }
 
   return (
-    <LoginForm authLogin={authLogin} authenticating={authenticating} />
+    <LoginForm
+      authLogin={authLogin}
+      authenticating={authenticating}
+      navigation={navigation}
+    />
   )
 }
 
