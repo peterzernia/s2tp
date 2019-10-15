@@ -1,8 +1,8 @@
 # s2tp - Speech To Target Process
 
-Speech To Target Process is an Android app that controls the movement of Target Process tickets in your agile process.
+Speech To Target Process is an Android app that controls the movement of Target Process tickets in your agile process through voice commands.
 
-![](https://imgur.com/c2vz5Qq)
+![](https://raw.githubusercontent.com/peterzernia/cloud/master/s2tp.gif)
 
 Available on the [Google Play Store](https://play.google.com/store/apps/details?id=com.s2tp)
 
