@@ -1,7 +1,6 @@
 import { Alert } from 'react-native'
 import axios from 'axios'
 import FuzzySet from 'fuzzyset.js'
-import { STATES } from '../constants'
 
 export const transcribeSpeech = (results) => {
   let ticket
@@ -29,13 +28,15 @@ export const transcribeSpeech = (results) => {
   }
 }
 
-export const updateTargetProcess = async (results, organization, accessToken) => {
+export const updateTargetProcess = async (results, organization, accessToken, entityStates) => {
   try {
     const { ticket, state } = transcribeSpeech(results)
 
     // Match state to closest allowed words
-    const fuzzySet = FuzzySet(STATES)
+    const fuzzySet = FuzzySet(entityStates)
     const matchState = fuzzySet.get(state)[0][1]
+
+    console.log({ entityStates, matchState })
 
     // Get the available states/ids for the ticket
     const nextStates = await axios.get(

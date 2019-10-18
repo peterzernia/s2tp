@@ -10,10 +10,20 @@ export default function LoginScreen({ navigation }) {
     try {
       setAuthenticating(true)
       if (organization && accessToken) {
-        await axios.get(`https://${organization}.tpondemand.com/api/v1/UserStories/?format=json&access_token=${accessToken}`)
+        // Get all available entity states for all entities
+        const res = await axios.get(`https://${organization}.tpondemand.com/api/v1/EntityStates/?include=[Name]&format=json&take=10000&access_token=${accessToken}`)
 
-        await AsyncStorage.setItem('organization', organization)
-        await AsyncStorage.setItem('accessToken', accessToken)
+        const allEntityStates = JSON.parse(res.request.response).Items.map(
+          item => item.Name,
+        )
+
+        const entityStates = [...new Set(allEntityStates)]
+
+        await Promise.all([
+          AsyncStorage.setItem('organization', organization),
+          AsyncStorage.setItem('accessToken', accessToken),
+          AsyncStorage.setItem('entityStates', JSON.stringify(entityStates)),
+        ])
 
         navigation.navigate('Main')
       } else {
@@ -21,6 +31,7 @@ export default function LoginScreen({ navigation }) {
       }
     } catch (err) {
       let error
+      console.log(err)
       if (typeof err.response === 'undefined') {
         error = 'Invalid organization name'
       } else if (err.response.status === 401) {

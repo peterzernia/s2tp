@@ -28,13 +28,18 @@ export default class MainScreen extends Component {
       partialResults: [],
       organization: null,
       accessToken: null,
+      entityStates: [],
     }
   }
 
   async componentDidMount() {
     const organization = await AsyncStorage.getItem('organization')
     const accessToken = await AsyncStorage.getItem('accessToken')
-    this.setState({ organization, accessToken })
+    const states = await AsyncStorage.getItem('entityStates')
+
+    const entityStates = JSON.parse(states)
+
+    this.setState({ organization, accessToken, entityStates })
   }
 
   componentWillUnmount() {
@@ -43,8 +48,11 @@ export default class MainScreen extends Component {
 
   authLogout = async () => {
     const { navigation } = this.props
+
     await AsyncStorage.removeItem('organization')
     await AsyncStorage.removeItem('accessToken')
+    await AsyncStorage.removeItem('entityStates')
+
     navigation.navigate('Login')
   }
 
@@ -79,11 +87,11 @@ export default class MainScreen extends Component {
 
   onSpeechResults = async (e) => {
     console.log('onSpeechResults: ', e)
-    const { organization, accessToken } = this.state
+    const { organization, accessToken, entityStates } = this.state
 
     this.setState({ results: e.value })
 
-    await updateTargetProcess(e.value, organization, accessToken)
+    await updateTargetProcess(e.value, organization, accessToken, entityStates)
   }
 
   onSpeechPartialResults = (e) => {
