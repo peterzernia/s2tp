@@ -20,8 +20,12 @@ e.g. '6258 in progress' or '5439 QA passed'
 
 Make sure you have the Google app installed on your Android device and that Recording Audio is activated.
 
+## Contributions
+
+Feel free to contribute to this project. The trickiest part is setting up React Native. Follow this [guide](https://facebook.github.io/react-native/docs/getting-started), under the React Native CLI Quickstart tab. After that, with a device plugged in, or a simulator running on your computer, run `make up` to start the development server.
+
 ## Built with
 
-- [React-Native](https://github.com/facebook/react-native)
+- [React Native](https://github.com/facebook/react-native)
 - [React-Native-Voice](https://github.com/react-native-community/react-native-voice)
 - [fuzzyset](https://github.com/Glench/fuzzyset.js)
